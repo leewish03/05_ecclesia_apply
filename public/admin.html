@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>신청 관리자</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <p>관리자 페이지</p>
+        <h1>제 5회 동기모임 신청 현황</h1>
+      </header>
+
+      <section class="admin-card">
+        <label for="adminAccessCode">관리자 코드</label>
+        <div class="admin-controls">
+          <input id="adminAccessCode" type="text" autocomplete="off" placeholder="관리자 코드 입력" />
+          <button id="loadAdmin" type="button">조회</button>
+        </div>
+        <p id="adminMessage" class="message"></p>
+      </section>
+
+      <section class="admin-results">
+        <div class="admin-results-header">
+          <h2>전체 응답</h2>
+          <button id="refreshAdmin" type="button">새로고침</button>
+        </div>
+        <div id="adminList" class="admin-list"></div>
+      </section>
+    </main>
+
+    <script src="/admin.js" type="module"></script>
+  </body>
+</html>

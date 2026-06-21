@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>제 5회 동기모임 신청</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p>제 5회 동기모임</p>
+        <h1>05년생 동기모임 신청</h1>
+        <span>아래 양식을 작성하여 신청해주세요</span>
+      </header>
+
+      <section class="content">
+        <button class="participant-button" id="openParticipants" type="button">
+          <span class="participant-icon">♙</span>
+          <strong>현재 참여 신청자 현황 보기</strong>
+          <small id="participantCount">목록 확인</small>
+          <span>›</span>
+        </button>
+
+        <form id="registrationForm" class="form-stack" novalidate>
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">1</span>
+              <label for="name">이름</label>
+              <em>필수</em>
+            </div>
+            <input id="name" name="name" autocomplete="name" placeholder="이름을 입력하세요" />
+          </section>
+
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">2</span>
+              <label for="church">소속교회</label>
+              <em>필수</em>
+            </div>
+            <input id="church" name="church" placeholder="소속 교회를 입력하세요" />
+          </section>
+
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">3</span>
+              <label for="phone">전화번호</label>
+              <em>필수</em>
+            </div>
+            <input id="phone" name="phone" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="010-0000-0000" />
+          </section>
+
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">4</span>
+              <span>성별</span>
+              <em>필수</em>
+            </div>
+            <div class="choice-row shadcn-toggle-group" role="radiogroup" aria-label="성별">
+              <label class="choice selected">
+                <input type="radio" name="gender" value="남" checked />
+                <span>남</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="gender" value="여" />
+                <span>여</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">5</span>
+              <span>구원 여부</span>
+              <em>필수</em>
+            </div>
+            <div class="choice-row shadcn-toggle-group" role="radiogroup" aria-label="구원 여부">
+              <label class="choice selected">
+                <input type="radio" name="isSaved" value="yes" checked />
+                <span>✓ 예</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="isSaved" value="no" />
+                <span>아니오</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="field-card">
+            <div class="field-title">
+              <span class="step">6</span>
+              <span>침례 여부</span>
+              <em>필수</em>
+            </div>
+            <div class="choice-row shadcn-toggle-group" role="radiogroup" aria-label="침례 여부">
+              <label class="choice selected">
+                <input type="radio" name="isBaptized" value="yes" checked />
+                <span>✓ 예</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="isBaptized" value="no" />
+                <span>아니오</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="field-card payment-card">
+            <div class="field-title">
+              <span class="step warm">7</span>
+              <span>입금 확인</span>
+              <em>필수</em>
+            </div>
+            <button class="account-box" id="copyAccount" type="button">
+              <span class="card-icon">▣</span>
+              <strong>카카오뱅크 3333-33-4743437</strong>
+              <small>눌러서 계좌번호를 복사한 뒤 회비를 입금해주세요.</small>
+            </button>
+            <label class="confirm-payment shadcn-toggle-button">
+              <input type="checkbox" name="paymentConfirmed" />
+              <span class="check-mark">✓</span>
+              <span>예! 입금을 완료했습니다</span>
+            </label>
+          </section>
+
+          <p class="message" id="message" role="status"></p>
+
+          <button class="submit-button" type="submit">
+            <svg class="submit-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 11.5 19 4.75l-6.75 14.5-2.4-6.7-5.35-1.05Z" />
+            </svg>
+            신청 완료하기
+          </button>
+        </form>
+
+        <p class="footnote">제출 후 수정이 어려울 수 있으니 내용을 확인해주세요.</p>
+      </section>
+    </main>
+
+    <dialog id="participantsDialog" class="dialog">
+      <div class="dialog-header">
+        <h2>현재 참여 신청자</h2>
+        <button id="closeParticipants" type="button" aria-label="닫기">×</button>
+      </div>
+      <div id="participantsList" class="participant-list"></div>
+    </dialog>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

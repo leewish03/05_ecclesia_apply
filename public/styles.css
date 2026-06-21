@@ -1,0 +1,494 @@
+:root {
+  --green: #3f8453;
+  --green-dark: #2d6f43;
+  --green-soft: #eaf3ec;
+  --text: #1d2520;
+  --muted: #777f79;
+  --line: #e1e2df;
+  --page: #f0f1ed;
+  --warm: #c99273;
+  --warm-bg: #fff8f4;
+  --card: #ffffff;
+  --card-foreground: var(--text);
+  --primary: var(--green);
+  --primary-foreground: #ffffff;
+  --muted-foreground: var(--muted);
+  --border: var(--line);
+  --input: #d8d9d5;
+  --ring: rgba(63, 132, 83, 0.18);
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(100%, 430px);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--page);
+}
+
+.hero {
+  padding: 38px 20px 34px;
+  text-align: center;
+  color: white;
+  background: linear-gradient(160deg, #5a9466 0%, #2f7046 100%);
+}
+
+.hero p,
+.admin-header p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.hero h1,
+.admin-header h1 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.hero span {
+  display: block;
+  margin-top: 9px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.content {
+  padding: 18px 14px 28px;
+}
+
+.participant-button,
+.field-card,
+.admin-card,
+.admin-results {
+  border: 1px solid rgba(39, 55, 43, 0.06);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 8px 20px rgba(29, 37, 32, 0.06);
+}
+
+.participant-button {
+  display: grid;
+  grid-template-columns: 32px 1fr auto 18px;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  margin-bottom: 12px;
+  border: 0;
+  padding: 0 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.participant-button strong {
+  font-size: 13px;
+}
+
+.participant-button small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.participant-icon {
+  color: var(--green);
+}
+
+.form-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.field-card {
+  padding: 15px;
+}
+
+.field-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 11px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.field-title em {
+  color: #bd7e72;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.step {
+  display: inline-grid;
+  width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.step.warm {
+  background: var(--warm);
+}
+
+input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--input);
+  border-radius: 7px;
+  background: #f8f8f6;
+  padding: 0 12px;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.shadcn-toggle-group {
+  border-radius: 8px;
+}
+
+.choice {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: #4f5751;
+  cursor: pointer;
+}
+
+.choice input {
+  display: none;
+}
+
+.choice.selected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 800;
+}
+
+.payment-card {
+  background: var(--warm-bg);
+}
+
+.account-box {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  margin-bottom: 9px;
+  border: 1px solid #c9a18c;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 15px 12px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-box small {
+  color: #7a6256;
+  font-size: 11px;
+}
+
+.card-icon {
+  color: var(--warm);
+}
+
+.confirm-payment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  border: 1px solid #c9a18c;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 0 14px;
+  color: #8f674f;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.confirm-payment input {
+  display: none;
+}
+
+.confirm-payment .check-mark {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid #c9a18c;
+  border-radius: 50%;
+  color: transparent;
+  font-size: 12px;
+}
+
+.confirm-payment.selected {
+  border-color: var(--warm);
+  background: var(--warm);
+  color: white;
+}
+
+.confirm-payment.selected .check-mark {
+  border-color: rgba(255, 255, 255, 0.75);
+  color: white;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 9px 18px rgba(47, 112, 70, 0.28);
+}
+
+.submit-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.message {
+  min-height: 19px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.message[data-type="success"] {
+  color: var(--green-dark);
+  font-weight: 800;
+}
+
+.message[data-type="error"] {
+  color: #b4483a;
+  font-weight: 800;
+}
+
+.footnote {
+  margin: 12px 0 0;
+  color: #999f9a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.dialog {
+  width: min(92vw, 390px);
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.dialog::backdrop {
+  background: rgba(16, 26, 19, 0.45);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 18px 8px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dialog-header button {
+  border: 0;
+  background: transparent;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.participant-list {
+  display: grid;
+  gap: 8px;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 10px 18px 18px;
+}
+
+.participant-row {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--green-soft);
+  padding: 10px;
+}
+
+.participant-row span {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.participant-row strong,
+.participant-row small {
+  display: block;
+}
+
+.participant-row small,
+.empty {
+  color: var(--muted);
+}
+
+.admin-shell {
+  width: min(100% - 28px, 920px);
+  margin: 0 auto;
+  padding: 28px 0;
+}
+
+.admin-header {
+  margin-bottom: 18px;
+}
+
+.admin-header h1 {
+  color: var(--text);
+}
+
+.admin-card,
+.admin-results {
+  padding: 18px;
+}
+
+.admin-card label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 800;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-controls button,
+.admin-results-header button {
+  border: 0;
+  border-radius: 7px;
+  background: var(--green);
+  padding: 0 16px;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-results {
+  margin-top: 14px;
+}
+
+.admin-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-results-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.admin-row strong,
+.admin-row small {
+  display: block;
+}
+
+.admin-row small {
+  color: var(--muted);
+}
+
+.admin-row dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.admin-row dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-row dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .admin-controls {
+    display: grid;
+  }
+
+  .admin-controls button {
+    min-height: 42px;
+  }
+
+  .admin-row dl {
+    grid-template-columns: 1fr;
+  }
+}
