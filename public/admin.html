@@ -54,18 +54,60 @@
             <strong id="totalCount">-</strong>
           </article>
           <article class="admin-stat-card">
+            <span>현재 보기</span>
+            <strong id="visibleCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
             <span>입금 완료</span>
             <strong id="paidCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>미입금</span>
+            <strong id="pendingCount">-</strong>
           </article>
           <article class="admin-stat-card">
             <span>남 / 여</span>
             <strong id="genderCount">-</strong>
           </article>
           <article class="admin-stat-card">
+            <span>구원 예</span>
+            <strong id="savedCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
             <span>침례 예</span>
             <strong id="baptizedCount">-</strong>
           </article>
+          <article class="admin-stat-card">
+            <span>소속교회</span>
+            <strong id="churchCount">-</strong>
+          </article>
         </section>
+      </section>
+
+      <section class="admin-insights" aria-label="요약 통계">
+        <article class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <p>Summary</p>
+              <h2>응답 요약</h2>
+            </div>
+          </div>
+          <div id="summaryBars" class="summary-bars">
+            <p class="empty">응답을 불러오면 주요 비율이 표시됩니다.</p>
+          </div>
+        </article>
+
+        <article class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <p>Churches</p>
+              <h2>교회별 신청</h2>
+            </div>
+          </div>
+          <div id="churchBreakdown" class="church-breakdown">
+            <p class="empty">아직 집계할 데이터가 없습니다.</p>
+          </div>
+        </article>
       </section>
 
       <section class="admin-results">
@@ -74,7 +116,41 @@
             <p>Responses</p>
             <h2>전체 응답</h2>
           </div>
-          <button id="refreshAdmin" type="button">새로고침</button>
+          <div class="admin-actions">
+            <button id="copySummary" type="button" class="secondary-button">요약 복사</button>
+            <button id="exportCsv" type="button" class="secondary-button">CSV 내보내기</button>
+            <button id="refreshAdmin" type="button">새로고침</button>
+          </div>
+        </div>
+
+        <div class="admin-toolbar" aria-label="응답 검색 및 필터">
+          <label class="sr-only" for="responseSearch">응답 검색</label>
+          <input id="responseSearch" type="search" placeholder="이름, 교회, 전화번호 검색" />
+          <label class="sr-only" for="paymentFilter">입금 필터</label>
+          <select id="paymentFilter" aria-label="입금 필터">
+            <option value="all">입금 전체</option>
+            <option value="paid">입금 완료</option>
+            <option value="pending">미입금</option>
+          </select>
+          <label class="sr-only" for="genderFilter">성별 필터</label>
+          <select id="genderFilter" aria-label="성별 필터">
+            <option value="all">성별 전체</option>
+            <option value="남">남</option>
+            <option value="여">여</option>
+          </select>
+          <label class="sr-only" for="savedFilter">구원 필터</label>
+          <select id="savedFilter" aria-label="구원 필터">
+            <option value="all">구원 전체</option>
+            <option value="yes">구원 예</option>
+            <option value="no">구원 아니오</option>
+          </select>
+          <label class="sr-only" for="baptizedFilter">침례 필터</label>
+          <select id="baptizedFilter" aria-label="침례 필터">
+            <option value="all">침례 전체</option>
+            <option value="yes">침례 예</option>
+            <option value="no">침례 아니오</option>
+          </select>
+          <button id="resetFilters" type="button" class="secondary-button">필터 초기화</button>
         </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
