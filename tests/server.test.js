@@ -136,3 +136,37 @@ test("GET /api/admin/registrations requires the admin access code", async () => 
     },
   );
 });
+
+test("GET /admin serves the admin page without the html suffix", async () => {
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/admin`);
+      const html = await response.text();
+
+      assert.equal(response.status, 200);
+      assert.match(html, /신청 운영 콘솔/);
+      assert.match(html, /전체 응답/);
+    },
+  );
+});
+
+test("GET /admin.html redirects to the clean admin path", async () => {
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/admin.html`, { redirect: "manual" });
+
+      assert.equal(response.status, 308);
+      assert.equal(response.headers.get("location"), "/admin");
+    },
+  );
+});

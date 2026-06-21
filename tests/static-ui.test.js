@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 
 const indexHtml = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+const adminHtml = await readFile(new URL("../public/admin.html", import.meta.url), "utf8");
+const adminJs = await readFile(new URL("../public/admin.js", import.meta.url), "utf8");
 
 test("public page uses the requested event title", () => {
   assert.match(indexHtml, /제 5회 동기모임/);
@@ -20,3 +22,15 @@ test("participant dialog open is guarded against duplicate open calls", () => {
   assert.match(appJs, /participantCount/);
 });
 
+test("admin page uses the cleaner dashboard layout", () => {
+  assert.match(adminHtml, /신청 운영 콘솔/);
+  assert.match(adminHtml, /admin-table/);
+  assert.match(adminHtml, /admin-stats/);
+  assert.doesNotMatch(adminHtml, /admin\.html/);
+});
+
+test("admin dashboard renders stats and table rows", () => {
+  assert.match(adminJs, /renderAdminStats/);
+  assert.match(adminJs, /adminTableBody/);
+  assert.match(adminJs, /x-admin-access-code/);
+});

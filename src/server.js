@@ -39,7 +39,17 @@ async function readJsonBody(request) {
 
 function serveStatic(request, response) {
   const requestUrl = new URL(request.url, "http://localhost");
-  const pathname = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
+  if (requestUrl.pathname === "/admin.html") {
+    response.writeHead(308, { location: "/admin" });
+    response.end();
+    return;
+  }
+
+  const pathname = requestUrl.pathname === "/"
+    ? "/index.html"
+    : requestUrl.pathname === "/admin"
+      ? "/admin.html"
+      : requestUrl.pathname;
   const normalizedPath = normalize(join(PUBLIC_DIR, decodeURIComponent(pathname)));
 
   if (!normalizedPath.startsWith(PUBLIC_DIR) || !existsSync(normalizedPath)) {

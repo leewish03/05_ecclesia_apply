@@ -3,6 +3,11 @@ const loadButton = document.querySelector("#loadAdmin");
 const refreshButton = document.querySelector("#refreshAdmin");
 const adminMessage = document.querySelector("#adminMessage");
 const adminList = document.querySelector("#adminList");
+const adminTableBody = document.querySelector("#adminTableBody");
+const totalCount = document.querySelector("#totalCount");
+const paidCount = document.querySelector("#paidCount");
+const genderCount = document.querySelector("#genderCount");
+const baptizedCount = document.querySelector("#baptizedCount");
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -16,6 +21,10 @@ function escapeHtml(value) {
 function setAdminMessage(text, type = "") {
   adminMessage.textContent = text;
   adminMessage.dataset.type = type;
+}
+
+function badge(value, tone = "default") {
+  return `<span class="admin-status-badge" data-tone="${tone}">${escapeHtml(value)}</span>`;
 }
 
 function formatPhoneNumber(value) {
@@ -38,9 +47,27 @@ function formatPhoneNumber(value) {
 
 function renderAdminRows(registrations) {
   if (registrations.length === 0) {
+    adminTableBody.innerHTML = '<tr><td colspan="8" class="admin-table-empty">아직 응답이 없습니다.</td></tr>';
     adminList.innerHTML = '<p class="empty">아직 응답이 없습니다.</p>';
     return;
   }
+
+  adminTableBody.innerHTML = registrations
+    .map(
+      (item) => `
+        <tr>
+          <td><strong>${escapeHtml(item.name)}</strong></td>
+          <td>${escapeHtml(item.church)}</td>
+          <td>${escapeHtml(formatPhoneNumber(item.phone))}</td>
+          <td>${escapeHtml(item.gender)}</td>
+          <td>${badge(item.isSaved ? "예" : "아니오", item.isSaved ? "success" : "muted")}</td>
+          <td>${badge(item.isBaptized ? "예" : "아니오", item.isBaptized ? "success" : "muted")}</td>
+          <td>${badge(item.paymentConfirmed ? "완료" : "미완료", item.paymentConfirmed ? "success" : "warning")}</td>
+          <td>${new Date(item.createdAt).toLocaleString("ko-KR")}</td>
+        </tr>
+      `,
+    )
+    .join("");
 
   adminList.innerHTML = registrations
     .map(
@@ -63,6 +90,18 @@ function renderAdminRows(registrations) {
     .join("");
 }
 
+function renderAdminStats(registrations) {
+  const paid = registrations.filter((item) => item.paymentConfirmed).length;
+  const male = registrations.filter((item) => item.gender === "남").length;
+  const female = registrations.filter((item) => item.gender === "여").length;
+  const baptized = registrations.filter((item) => item.isBaptized).length;
+
+  totalCount.textContent = registrations.length;
+  paidCount.textContent = paid;
+  genderCount.textContent = `${male} / ${female}`;
+  baptizedCount.textContent = baptized;
+}
+
 async function loadAdminRows() {
   const accessCode = accessCodeInput.value;
   setAdminMessage("불러오는 중입니다...");
@@ -77,6 +116,7 @@ async function loadAdminRows() {
       throw new Error(body.message || "관리자 조회에 실패했습니다.");
     }
 
+    renderAdminStats(body.registrations);
     renderAdminRows(body.registrations);
     setAdminMessage(`총 ${body.registrations.length}개의 응답을 불러왔습니다.`, "success");
   } catch (error) {

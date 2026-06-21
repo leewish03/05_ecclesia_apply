@@ -6,28 +6,98 @@
     <title>신청 관리자</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body class="admin-page">
     <main class="admin-shell">
-      <header class="admin-header">
-        <p>관리자 페이지</p>
-        <h1>제 5회 동기모임 신청 현황</h1>
+      <header class="admin-topbar">
+        <a class="admin-brand" href="/">
+          <span class="admin-brand-mark">05</span>
+          <span>
+            <strong>제 5회 동기모임</strong>
+            <small>신청 운영 콘솔</small>
+          </span>
+        </a>
+        <a class="admin-public-link" href="/">신청 페이지</a>
       </header>
 
-      <section class="admin-card">
-        <label for="adminAccessCode">관리자 코드</label>
-        <div class="admin-controls">
-          <input id="adminAccessCode" type="text" autocomplete="off" placeholder="관리자 코드 입력" />
-          <button id="loadAdmin" type="button">조회</button>
+      <section class="admin-hero-panel">
+        <div>
+          <p>Admin Dashboard</p>
+          <h1>05년생 동기모임 신청 현황</h1>
+          <span>관리자 코드 입력 후 전체 응답과 입금 상태를 확인할 수 있습니다.</span>
         </div>
-        <p id="adminMessage" class="message"></p>
+        <div class="admin-hero-status" aria-label="배포 상태">
+          <span class="status-dot"></span>
+          운영 중
+        </div>
+      </section>
+
+      <section class="admin-grid">
+        <section class="admin-card admin-access-card">
+          <div class="admin-card-header">
+            <div>
+              <p>Access</p>
+              <h2>관리자 코드</h2>
+            </div>
+            <span class="admin-badge">Private</span>
+          </div>
+          <label class="sr-only" for="adminAccessCode">관리자 코드</label>
+          <div class="admin-controls">
+            <input id="adminAccessCode" type="text" autocomplete="off" placeholder="관리자 코드 입력" />
+            <button id="loadAdmin" type="button">응답 불러오기</button>
+          </div>
+          <p id="adminMessage" class="message"></p>
+        </section>
+
+        <section class="admin-stats" aria-label="신청 통계">
+          <article class="admin-stat-card">
+            <span>총 신청</span>
+            <strong id="totalCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>입금 완료</span>
+            <strong id="paidCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>남 / 여</span>
+            <strong id="genderCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>침례 예</span>
+            <strong id="baptizedCount">-</strong>
+          </article>
+        </section>
       </section>
 
       <section class="admin-results">
         <div class="admin-results-header">
-          <h2>전체 응답</h2>
+          <div>
+            <p>Responses</p>
+            <h2>전체 응답</h2>
+          </div>
           <button id="refreshAdmin" type="button">새로고침</button>
         </div>
-        <div id="adminList" class="admin-list"></div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>소속교회</th>
+                <th>전화번호</th>
+                <th>성별</th>
+                <th>구원</th>
+                <th>침례</th>
+                <th>입금</th>
+                <th>신청일</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <tr>
+                <td colspan="8" class="admin-table-empty">관리자 코드를 입력하고 응답을 불러오세요.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="adminList" class="admin-list" aria-label="모바일 응답 목록"></div>
       </section>
     </main>
 

@@ -16,7 +16,7 @@ npm.cmd start
 접속:
 
 - 신청 페이지: `http://localhost:4173`
-- 관리자 페이지: `http://localhost:4173/admin.html`
+- 관리자 페이지: `http://localhost:4173/admin`
 
 ## Supabase 설정
 
