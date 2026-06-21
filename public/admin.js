@@ -8,6 +8,7 @@ const totalCount = document.querySelector("#totalCount");
 const visibleCount = document.querySelector("#visibleCount");
 const paidCount = document.querySelector("#paidCount");
 const pendingCount = document.querySelector("#pendingCount");
+const unconfirmedCount = document.querySelector("#unconfirmedCount");
 const genderCount = document.querySelector("#genderCount");
 const savedCount = document.querySelector("#savedCount");
 const baptizedCount = document.querySelector("#baptizedCount");
@@ -26,6 +27,18 @@ const copySummaryButton = document.querySelector("#copySummary");
 let allRegistrations = [];
 let visibleRegistrations = [];
 
+const PAYMENT_STATUS_LABELS = {
+  unconfirmed: "미확인",
+  unpaid: "미입금",
+  paid: "입금 완료",
+};
+
+const PAYMENT_STATUS_TONES = {
+  unconfirmed: "muted",
+  unpaid: "warning",
+  paid: "success",
+};
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -42,6 +55,24 @@ function setAdminMessage(text, type = "") {
 
 function badge(value, tone = "default") {
   return `<span class="admin-status-badge" data-tone="${tone}">${escapeHtml(value)}</span>`;
+}
+
+function paymentStatusSelect(item) {
+  const current = item.adminPaymentStatus || "unconfirmed";
+  return `
+    <label class="sr-only" for="paymentStatus-${escapeHtml(item.id)}">관리자 입금상태</label>
+    <select
+      id="paymentStatus-${escapeHtml(item.id)}"
+      class="admin-payment-select"
+      data-registration-id="${escapeHtml(item.id)}"
+      data-current-status="${escapeHtml(current)}"
+      aria-label="${escapeHtml(item.name)} 관리자 입금상태"
+    >
+      <option value="unconfirmed"${current === "unconfirmed" ? " selected" : ""}>미확인</option>
+      <option value="unpaid"${current === "unpaid" ? " selected" : ""}>미입금</option>
+      <option value="paid"${current === "paid" ? " selected" : ""}>입금 완료</option>
+    </select>
+  `;
 }
 
 function percent(part, total) {
@@ -82,7 +113,7 @@ function formatPhoneNumber(value) {
 
 function renderAdminRows(registrations) {
   if (registrations.length === 0) {
-    adminTableBody.innerHTML = '<tr><td colspan="8" class="admin-table-empty">조건에 맞는 응답이 없습니다.</td></tr>';
+    adminTableBody.innerHTML = '<tr><td colspan="9" class="admin-table-empty">조건에 맞는 응답이 없습니다.</td></tr>';
     adminList.innerHTML = '<p class="empty">조건에 맞는 응답이 없습니다.</p>';
     return;
   }
@@ -98,6 +129,7 @@ function renderAdminRows(registrations) {
           <td>${badge(item.isSaved ? "예" : "아니오", item.isSaved ? "success" : "muted")}</td>
           <td>${badge(item.isBaptized ? "예" : "아니오", item.isBaptized ? "success" : "muted")}</td>
           <td>${badge(item.paymentConfirmed ? "완료" : "미완료", item.paymentConfirmed ? "success" : "warning")}</td>
+          <td>${paymentStatusSelect(item)}</td>
           <td>${new Date(item.createdAt).toLocaleString("ko-KR")}</td>
         </tr>
       `,
@@ -116,7 +148,8 @@ function renderAdminRows(registrations) {
             <div><dt>전화번호</dt><dd>${escapeHtml(formatPhoneNumber(item.phone))}</dd></div>
             <div><dt>구원 여부</dt><dd>${item.isSaved ? "예" : "아니오"}</dd></div>
             <div><dt>침례 여부</dt><dd>${item.isBaptized ? "예" : "아니오"}</dd></div>
-            <div><dt>입금 확인</dt><dd>${item.paymentConfirmed ? "완료" : "미완료"}</dd></div>
+            <div><dt>자가 체크</dt><dd>${item.paymentConfirmed ? "완료" : "미완료"}</dd></div>
+            <div><dt>관리자 입금상태</dt><dd>${paymentStatusSelect(item)}</dd></div>
             <div><dt>신청일</dt><dd>${new Date(item.createdAt).toLocaleString("ko-KR")}</dd></div>
           </dl>
         </article>
@@ -127,12 +160,12 @@ function renderAdminRows(registrations) {
 
 function renderSummaryBars(registrations) {
   const total = registrations.length;
-  const paid = registrations.filter((item) => item.paymentConfirmed).length;
+  const paid = registrations.filter((item) => item.adminPaymentStatus === "paid").length;
   const saved = registrations.filter((item) => item.isSaved).length;
   const baptized = registrations.filter((item) => item.isBaptized).length;
   const male = registrations.filter((item) => item.gender === "남").length;
   const rows = [
-    ["입금 완료", paid, total, "success"],
+    ["관리자 입금 완료", paid, total, "success"],
     ["구원 예", saved, total, "success"],
     ["침례 예", baptized, total, "success"],
     ["남성", male, total, "muted"],
@@ -189,8 +222,9 @@ function renderChurchBreakdown(registrations) {
 }
 
 function renderAdminStats(registrations, filteredRegistrations = registrations) {
-  const paid = filteredRegistrations.filter((item) => item.paymentConfirmed).length;
-  const pending = filteredRegistrations.length - paid;
+  const paid = filteredRegistrations.filter((item) => item.adminPaymentStatus === "paid").length;
+  const pending = filteredRegistrations.filter((item) => item.adminPaymentStatus === "unpaid").length;
+  const unconfirmed = filteredRegistrations.filter((item) => item.adminPaymentStatus === "unconfirmed").length;
   const male = filteredRegistrations.filter((item) => item.gender === "남").length;
   const female = filteredRegistrations.filter((item) => item.gender === "여").length;
   const saved = filteredRegistrations.filter((item) => item.isSaved).length;
@@ -201,6 +235,7 @@ function renderAdminStats(registrations, filteredRegistrations = registrations) 
   visibleCount.textContent = filteredRegistrations.length;
   paidCount.textContent = paid;
   pendingCount.textContent = pending;
+  unconfirmedCount.textContent = unconfirmed;
   genderCount.textContent = `${male} / ${female}`;
   savedCount.textContent = saved;
   baptizedCount.textContent = baptized;
@@ -220,9 +255,7 @@ function getFilteredRegistrations() {
     const matchesQuery = !query
       || [item.name, item.church, item.phone, formatPhoneNumber(item.phone)]
         .some((value) => String(value ?? "").toLowerCase().includes(query));
-    const matchesPayment = payment === "all"
-      || (payment === "paid" && item.paymentConfirmed)
-      || (payment === "pending" && !item.paymentConfirmed);
+    const matchesPayment = payment === "all" || item.adminPaymentStatus === payment;
     const matchesGender = gender === "all" || item.gender === gender;
     const matchesSaved = saved === "all"
       || (saved === "yes" && item.isSaved)
@@ -255,7 +288,7 @@ function exportVisibleCsv() {
     return;
   }
 
-  const header = ["이름", "소속교회", "전화번호", "성별", "구원여부", "침례여부", "입금완료", "신청일"];
+  const header = ["이름", "소속교회", "전화번호", "성별", "구원여부", "침례여부", "자가입금체크", "관리자입금상태", "신청일"];
   const rows = visibleRegistrations.map((item) => [
     item.name,
     item.church,
@@ -264,6 +297,7 @@ function exportVisibleCsv() {
     item.isSaved ? "예" : "아니오",
     item.isBaptized ? "예" : "아니오",
     item.paymentConfirmed ? "완료" : "미완료",
+    PAYMENT_STATUS_LABELS[item.adminPaymentStatus] || "미확인",
     new Date(item.createdAt).toLocaleString("ko-KR"),
   ]);
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
@@ -278,9 +312,11 @@ function exportVisibleCsv() {
 }
 
 async function copySummary() {
-  const paid = visibleRegistrations.filter((item) => item.paymentConfirmed).length;
+  const paid = visibleRegistrations.filter((item) => item.adminPaymentStatus === "paid").length;
+  const unpaid = visibleRegistrations.filter((item) => item.adminPaymentStatus === "unpaid").length;
+  const unconfirmed = visibleRegistrations.filter((item) => item.adminPaymentStatus === "unconfirmed").length;
   const pendingNames = visibleRegistrations
-    .filter((item) => !item.paymentConfirmed)
+    .filter((item) => item.adminPaymentStatus !== "paid")
     .map((item) => `${item.name}(${item.church})`);
   const churches = getChurchEntries(visibleRegistrations)
     .map(([church, count]) => `${church} ${count}명`)
@@ -289,14 +325,41 @@ async function copySummary() {
     "제 5회 동기모임 신청 요약",
     `전체 응답: ${allRegistrations.length}개`,
     `현재 보기: ${visibleRegistrations.length}개`,
-    `입금 완료: ${paid}개`,
-    `미입금: ${visibleRegistrations.length - paid}개`,
+    `관리자 입금 완료: ${paid}개`,
+    `관리자 미입금: ${unpaid}개`,
+    `관리자 미확인: ${unconfirmed}개`,
     `교회별: ${churches || "없음"}`,
-    `미입금자: ${pendingNames.join(", ") || "없음"}`,
+    `확인 필요: ${pendingNames.join(", ") || "없음"}`,
   ].join("\n");
 
   await navigator.clipboard.writeText(summary);
   setAdminMessage("현재 보기 기준 요약을 복사했습니다.", "success");
+}
+
+async function updateAdminPaymentStatus(id, status) {
+  const accessCode = accessCodeInput.value;
+  const response = await fetch(`/api/admin/registrations/${encodeURIComponent(id)}/payment-status`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+      "x-admin-access-code": accessCode,
+    },
+    body: JSON.stringify({ status }),
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.message || "입금 상태 변경에 실패했습니다.");
+  }
+
+  allRegistrations = allRegistrations.map((item) =>
+    item.id === id ? { ...item, adminPaymentStatus: body.registration.adminPaymentStatus } : item,
+  );
+  applyFilters();
+  setAdminMessage(
+    `${body.registration.name}님의 입금 상태를 ${PAYMENT_STATUS_LABELS[body.registration.adminPaymentStatus]}로 변경했습니다.`,
+    "success",
+  );
 }
 
 async function loadAdminRows() {
@@ -340,6 +403,26 @@ resetFiltersButton.addEventListener("click", () => {
 exportCsvButton.addEventListener("click", exportVisibleCsv);
 copySummaryButton.addEventListener("click", () => {
   copySummary().catch((error) => setAdminMessage(error.message, "error"));
+});
+document.addEventListener("change", (event) => {
+  if (!event.target.matches(".admin-payment-select")) {
+    return;
+  }
+
+  const select = event.target;
+  const id = select.dataset.registrationId;
+  const nextStatus = select.value;
+  const previousStatus = select.dataset.currentStatus || "unconfirmed";
+
+  select.disabled = true;
+  updateAdminPaymentStatus(id, nextStatus)
+    .catch((error) => {
+      select.value = previousStatus;
+      setAdminMessage(error.message, "error");
+    })
+    .finally(() => {
+      select.disabled = false;
+    });
 });
 accessCodeInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {

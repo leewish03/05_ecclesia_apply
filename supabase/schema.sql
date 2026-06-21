@@ -9,11 +9,29 @@ create table if not exists public.registrations (
   is_saved boolean not null,
   is_baptized boolean not null default false,
   payment_confirmed boolean not null,
+  admin_payment_status text not null default 'unconfirmed'
+    check (admin_payment_status in ('unconfirmed', 'unpaid', 'paid')),
   created_at timestamptz not null default now()
 );
 
 alter table public.registrations
   add column if not exists is_baptized boolean not null default false;
+
+alter table public.registrations
+  add column if not exists admin_payment_status text not null default 'unconfirmed';
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'registrations_admin_payment_status_check'
+  ) then
+    alter table public.registrations
+      add constraint registrations_admin_payment_status_check
+      check (admin_payment_status in ('unconfirmed', 'unpaid', 'paid'));
+  end if;
+end $$;
 
 alter table public.registrations enable row level security;
 

@@ -137,6 +137,75 @@ test("GET /api/admin/registrations requires the admin access code", async () => 
   );
 });
 
+test("PATCH /api/admin/registrations/:id/payment-status updates admin payment status", async () => {
+  let updated = null;
+
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      updateAdminPaymentStatus: async (id, status) => {
+        updated = { id, status };
+        return {
+          id,
+          name: "홍길동",
+          church: "서울교회",
+          phone: "01012345678",
+          gender: "남",
+          isSaved: true,
+          isBaptized: false,
+          paymentConfirmed: true,
+          adminPaymentStatus: status,
+          createdAt: "2026-06-21T00:00:00.000Z",
+        };
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc/payment-status`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          "x-admin-access-code": "demo-code",
+        },
+        body: JSON.stringify({ status: "paid" }),
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(updated, { id: "abc", status: "paid" });
+      assert.equal(body.registration.adminPaymentStatus, "paid");
+    },
+  );
+});
+
+test("PATCH /api/admin/registrations/:id/payment-status rejects invalid status", async () => {
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      updateAdminPaymentStatus: async () => {
+        throw new Error("must not update");
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc/payment-status`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          "x-admin-access-code": "demo-code",
+        },
+        body: JSON.stringify({ status: "done" }),
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 400);
+      assert.equal(body.ok, false);
+    },
+  );
+});
+
 test("GET /admin serves the admin page without the html suffix", async () => {
   await withServer(
     {

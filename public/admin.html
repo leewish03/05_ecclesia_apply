@@ -58,12 +58,16 @@
             <strong id="visibleCount">-</strong>
           </article>
           <article class="admin-stat-card">
-            <span>입금 완료</span>
+            <span>관리자 입금 완료</span>
             <strong id="paidCount">-</strong>
           </article>
           <article class="admin-stat-card">
-            <span>미입금</span>
+            <span>관리자 미입금</span>
             <strong id="pendingCount">-</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>관리자 미확인</span>
+            <strong id="unconfirmedCount">-</strong>
           </article>
           <article class="admin-stat-card">
             <span>남 / 여</span>
@@ -128,9 +132,10 @@
           <input id="responseSearch" type="search" placeholder="이름, 교회, 전화번호 검색" />
           <label class="sr-only" for="paymentFilter">입금 필터</label>
           <select id="paymentFilter" aria-label="입금 필터">
-            <option value="all">입금 전체</option>
+            <option value="all">관리자 입금상태 전체</option>
+            <option value="unconfirmed">미확인</option>
             <option value="paid">입금 완료</option>
-            <option value="pending">미입금</option>
+            <option value="unpaid">미입금</option>
           </select>
           <label class="sr-only" for="genderFilter">성별 필터</label>
           <select id="genderFilter" aria-label="성별 필터">
@@ -162,13 +167,14 @@
                 <th>성별</th>
                 <th>구원</th>
                 <th>침례</th>
-                <th>입금</th>
+                <th>자가 체크</th>
+                <th>관리자 입금상태</th>
                 <th>신청일</th>
               </tr>
             </thead>
             <tbody id="adminTableBody">
               <tr>
-                <td colspan="8" class="admin-table-empty">관리자 코드를 입력하고 응답을 불러오세요.</td>
+                <td colspan="9" class="admin-table-empty">관리자 코드를 입력하고 응답을 불러오세요.</td>
               </tr>
             </tbody>
           </table>

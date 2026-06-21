@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { getConfig, isAdminAccessCodeValid } from "./config.js";
 import { createMemoryRepository } from "./memoryRepository.js";
 import { createSupabaseRepository } from "./supabaseRest.js";
-import { validateRegistration } from "./validation.js";
+import { parseAdminPaymentStatus, validateRegistration } from "./validation.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PUBLIC_DIR = normalize(join(__dirname, "..", "public"));
@@ -104,6 +104,31 @@ export function createServer({ repository, config }) {
 
         const registrations = await repository.listAdminRegistrations();
         sendJson(response, 200, { ok: true, registrations });
+        return;
+      }
+
+      const paymentStatusMatch = url.pathname.match(/^\/api\/admin\/registrations\/([^/]+)\/payment-status$/);
+      if (request.method === "PATCH" && paymentStatusMatch) {
+        const accessCode = request.headers["x-admin-access-code"];
+
+        if (!isAdminAccessCodeValid(accessCode, config.adminAccessCode)) {
+          sendJson(response, 401, { ok: false, message: "관리자 코드가 올바르지 않습니다." });
+          return;
+        }
+
+        const body = await readJsonBody(request);
+        const status = parseAdminPaymentStatus(body.status);
+
+        if (!status) {
+          sendJson(response, 400, { ok: false, message: "입금 상태가 올바르지 않습니다." });
+          return;
+        }
+
+        const registration = await repository.updateAdminPaymentStatus(
+          decodeURIComponent(paymentStatusMatch[1]),
+          status,
+        );
+        sendJson(response, 200, { ok: true, registration });
         return;
       }
 

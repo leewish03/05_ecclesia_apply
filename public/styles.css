@@ -720,6 +720,13 @@ input:focus {
   min-width: 0;
 }
 
+.admin-payment-select {
+  min-width: 116px;
+  background: white;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .admin-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);

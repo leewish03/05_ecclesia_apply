@@ -29,6 +29,7 @@ test("admin page uses the cleaner dashboard layout", () => {
   assert.match(adminHtml, /CSV 내보내기/);
   assert.match(adminHtml, /요약 복사/);
   assert.match(adminHtml, /입금 필터/);
+  assert.match(adminHtml, /관리자 입금상태/);
   assert.match(adminHtml, /교회별 신청/);
   assert.doesNotMatch(adminHtml, /admin\.html/);
 });
@@ -39,6 +40,8 @@ test("admin dashboard renders stats and table rows", () => {
   assert.match(adminJs, /renderChurchBreakdown/);
   assert.match(adminJs, /exportVisibleCsv/);
   assert.match(adminJs, /copySummary/);
+  assert.match(adminJs, /updateAdminPaymentStatus/);
+  assert.match(adminJs, /admin-payment-select/);
   assert.match(adminJs, /getFilteredRegistrations/);
   assert.match(adminJs, /adminTableBody/);
   assert.match(adminJs, /x-admin-access-code/);

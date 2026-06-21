@@ -5,6 +5,7 @@ import {
   validateRegistration,
   toAdminRegistration,
   toPublicRegistration,
+  toSupabaseRegistration,
 } from "../src/validation.js";
 
 test("validateRegistration accepts complete registration data", () => {
@@ -109,6 +110,7 @@ test("toAdminRegistration exposes all admin fields", () => {
     is_saved: false,
     is_baptized: true,
     payment_confirmed: true,
+    admin_payment_status: "paid",
     created_at: "2026-06-21T00:00:00.000Z",
   });
 
@@ -121,6 +123,21 @@ test("toAdminRegistration exposes all admin fields", () => {
     isSaved: false,
     isBaptized: true,
     paymentConfirmed: true,
+    adminPaymentStatus: "paid",
     createdAt: "2026-06-21T00:00:00.000Z",
   });
+});
+
+test("toSupabaseRegistration starts admin payment status as unconfirmed", () => {
+  const row = toSupabaseRegistration({
+    name: "홍길동",
+    church: "서울교회",
+    phone: "01012345678",
+    gender: "남",
+    isSaved: true,
+    isBaptized: false,
+    paymentConfirmed: true,
+  });
+
+  assert.equal(row.admin_payment_status, "unconfirmed");
 });

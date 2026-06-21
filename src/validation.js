@@ -27,6 +27,13 @@ function parseGender(value) {
   return ["남", "여"].includes(cleaned) ? cleaned : null;
 }
 
+export const ADMIN_PAYMENT_STATUSES = ["unconfirmed", "unpaid", "paid"];
+
+export function parseAdminPaymentStatus(value) {
+  const cleaned = cleanText(value);
+  return ADMIN_PAYMENT_STATUSES.includes(cleaned) ? cleaned : null;
+}
+
 export function validateRegistration(input) {
   const value = {
     name: cleanText(input?.name),
@@ -78,6 +85,7 @@ export function toSupabaseRegistration(value) {
     is_saved: value.isSaved,
     is_baptized: value.isBaptized,
     payment_confirmed: value.paymentConfirmed,
+    admin_payment_status: "unconfirmed",
   };
 }
 
@@ -98,6 +106,7 @@ export function toAdminRegistration(row) {
     isSaved: row.is_saved,
     isBaptized: row.is_baptized,
     paymentConfirmed: row.payment_confirmed,
+    adminPaymentStatus: row.admin_payment_status || "unconfirmed",
     createdAt: row.created_at,
   };
 }

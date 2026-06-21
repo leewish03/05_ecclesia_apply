@@ -46,10 +46,30 @@ export function createSupabaseRepository(config) {
     },
 
     async listAdminRegistrations() {
-      const url = `${baseUrl}?select=id,name,church,phone,gender,is_saved,is_baptized,payment_confirmed,created_at&order=created_at.desc`;
+      const url = `${baseUrl}?select=id,name,church,phone,gender,is_saved,is_baptized,payment_confirmed,admin_payment_status,created_at&order=created_at.desc`;
       const response = await fetch(url, { headers: baseHeaders });
       const rows = await parseSupabaseResponse(response);
       return rows.map(toAdminRegistration);
+    },
+
+    async updateAdminPaymentStatus(id, status) {
+      const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          ...baseHeaders,
+          "content-type": "application/json",
+          prefer: "return=representation",
+        },
+        body: JSON.stringify({ admin_payment_status: status }),
+      });
+      const rows = await parseSupabaseResponse(response);
+
+      if (!rows[0]) {
+        throw new Error("응답을 찾을 수 없습니다.");
+      }
+
+      return toAdminRegistration(rows[0]);
     },
   };
 }
