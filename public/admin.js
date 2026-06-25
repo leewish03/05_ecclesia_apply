@@ -75,6 +75,21 @@ function paymentStatusSelect(item) {
   `;
 }
 
+function deleteButton(item) {
+  return `
+    <button
+      type="button"
+      class="danger-button delete-registration-button"
+      data-registration-id="${escapeHtml(item.id)}"
+      data-registration-name="${escapeHtml(item.name)}"
+      data-registration-church="${escapeHtml(item.church)}"
+      aria-label="${escapeHtml(item.name)} 응답 삭제"
+    >
+      삭제
+    </button>
+  `;
+}
+
 function percent(part, total) {
   if (total === 0) {
     return 0;
@@ -113,7 +128,7 @@ function formatPhoneNumber(value) {
 
 function renderAdminRows(registrations) {
   if (registrations.length === 0) {
-    adminTableBody.innerHTML = '<tr><td colspan="9" class="admin-table-empty">조건에 맞는 응답이 없습니다.</td></tr>';
+    adminTableBody.innerHTML = '<tr><td colspan="10" class="admin-table-empty">조건에 맞는 응답이 없습니다.</td></tr>';
     adminList.innerHTML = '<p class="empty">조건에 맞는 응답이 없습니다.</p>';
     return;
   }
@@ -131,6 +146,7 @@ function renderAdminRows(registrations) {
           <td>${badge(item.paymentConfirmed ? "완료" : "미완료", item.paymentConfirmed ? "success" : "warning")}</td>
           <td>${paymentStatusSelect(item)}</td>
           <td>${new Date(item.createdAt).toLocaleString("ko-KR")}</td>
+          <td>${deleteButton(item)}</td>
         </tr>
       `,
     )
@@ -152,6 +168,7 @@ function renderAdminRows(registrations) {
             <div><dt>관리자 입금상태</dt><dd>${paymentStatusSelect(item)}</dd></div>
             <div><dt>신청일</dt><dd>${new Date(item.createdAt).toLocaleString("ko-KR")}</dd></div>
           </dl>
+          <div class="admin-row-actions">${deleteButton(item)}</div>
         </article>
       `,
     )
@@ -362,6 +379,23 @@ async function updateAdminPaymentStatus(id, status) {
   );
 }
 
+async function deleteRegistration(id) {
+  const accessCode = accessCodeInput.value;
+  const response = await fetch(`/api/admin/registrations/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { "x-admin-access-code": accessCode },
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.message || "응답 삭제에 실패했습니다.");
+  }
+
+  allRegistrations = allRegistrations.filter((item) => item.id !== id);
+  applyFilters();
+  setAdminMessage(`${body.registration.name}님의 응답을 삭제했습니다.`, "success");
+}
+
 async function loadAdminRows() {
   const accessCode = accessCodeInput.value;
   setAdminMessage("불러오는 중입니다...");
@@ -422,6 +456,29 @@ document.addEventListener("change", (event) => {
     })
     .finally(() => {
       select.disabled = false;
+    });
+});
+document.addEventListener("click", (event) => {
+  const button = event.target.closest(".delete-registration-button");
+
+  if (!button) {
+    return;
+  }
+
+  const id = button.dataset.registrationId;
+  const name = button.dataset.registrationName || "선택한 응답";
+  const church = button.dataset.registrationChurch || "";
+  const label = church ? `${name}(${church})` : name;
+
+  if (!window.confirm(`${label} 응답을 삭제할까요?\n삭제하면 관리자 페이지와 신청자 현황에서 바로 사라집니다.`)) {
+    return;
+  }
+
+  button.disabled = true;
+  deleteRegistration(id)
+    .catch((error) => setAdminMessage(error.message, "error"))
+    .finally(() => {
+      button.disabled = false;
     });
 });
 accessCodeInput.addEventListener("keydown", (event) => {

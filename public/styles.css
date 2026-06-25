@@ -708,6 +708,23 @@ input:focus {
   color: var(--text) !important;
 }
 
+.danger-button {
+  min-height: 34px;
+  border: 1px solid #e2b7ae;
+  border-radius: 7px;
+  background: #fff7f5;
+  padding: 0 12px;
+  color: #a33b2f;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .admin-toolbar {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(130px, 160px)) auto;
@@ -816,6 +833,12 @@ input:focus {
 .admin-row dd {
   margin: 2px 0 0;
   font-weight: 700;
+}
+
+.admin-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 @media (max-width: 900px) {

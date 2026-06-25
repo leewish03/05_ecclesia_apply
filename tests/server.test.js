@@ -206,6 +206,65 @@ test("PATCH /api/admin/registrations/:id/payment-status rejects invalid status",
   );
 });
 
+test("DELETE /api/admin/registrations/:id deletes an admin registration", async () => {
+  let deletedId = null;
+
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      deleteRegistration: async (id) => {
+        deletedId = id;
+        return {
+          id,
+          name: "홍길동",
+          church: "서울교회",
+          phone: "01012345678",
+          gender: "남",
+          isSaved: true,
+          isBaptized: false,
+          paymentConfirmed: true,
+          adminPaymentStatus: "unconfirmed",
+          createdAt: "2026-06-21T00:00:00.000Z",
+        };
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc`, {
+        method: "DELETE",
+        headers: { "x-admin-access-code": "demo-code" },
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.equal(deletedId, "abc");
+      assert.equal(body.registration.name, "홍길동");
+    },
+  );
+});
+
+test("DELETE /api/admin/registrations/:id requires the admin access code", async () => {
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      deleteRegistration: async () => {
+        throw new Error("must not delete");
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc`, {
+        method: "DELETE",
+        headers: { "x-admin-access-code": "wrong" },
+      });
+
+      assert.equal(response.status, 401);
+    },
+  );
+});
+
 test("GET /admin serves the admin page without the html suffix", async () => {
   await withServer(
     {

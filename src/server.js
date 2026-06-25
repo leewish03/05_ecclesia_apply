@@ -132,6 +132,22 @@ export function createServer({ repository, config }) {
         return;
       }
 
+      const adminRegistrationMatch = url.pathname.match(/^\/api\/admin\/registrations\/([^/]+)$/);
+      if (request.method === "DELETE" && adminRegistrationMatch) {
+        const accessCode = request.headers["x-admin-access-code"];
+
+        if (!isAdminAccessCodeValid(accessCode, config.adminAccessCode)) {
+          sendJson(response, 401, { ok: false, message: "관리자 코드가 올바르지 않습니다." });
+          return;
+        }
+
+        const registration = await repository.deleteRegistration(
+          decodeURIComponent(adminRegistrationMatch[1]),
+        );
+        sendJson(response, 200, { ok: true, registration });
+        return;
+      }
+
       if (request.method === "GET" || request.method === "HEAD") {
         serveStatic(request, response);
         return;

@@ -71,5 +71,23 @@ export function createSupabaseRepository(config) {
 
       return toAdminRegistration(rows[0]);
     },
+
+    async deleteRegistration(id) {
+      const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          ...baseHeaders,
+          prefer: "return=representation",
+        },
+      });
+      const rows = await parseSupabaseResponse(response);
+
+      if (!rows[0]) {
+        throw new Error("응답을 찾을 수 없습니다.");
+      }
+
+      return toAdminRegistration(rows[0]);
+    },
   };
 }

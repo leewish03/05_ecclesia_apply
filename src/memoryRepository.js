@@ -32,5 +32,16 @@ export function createMemoryRepository(seed = []) {
       row.admin_payment_status = status;
       return toAdminRegistration(row);
     },
+
+    async deleteRegistration(id) {
+      const index = rows.findIndex((item) => item.id === id);
+
+      if (index === -1) {
+        throw new Error("응답을 찾을 수 없습니다.");
+      }
+
+      const [row] = rows.splice(index, 1);
+      return toAdminRegistration(row);
+    },
   };
 }
