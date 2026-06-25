@@ -31,6 +31,8 @@ test("admin page uses the cleaner dashboard layout", () => {
   assert.match(adminHtml, /입금 필터/);
   assert.match(adminHtml, /관리자 입금상태/);
   assert.match(adminHtml, /관리/);
+  assert.match(adminHtml, /활성 응답/);
+  assert.match(adminHtml, /휴지통/);
   assert.match(adminHtml, /교회별 신청/);
   assert.doesNotMatch(adminHtml, /admin\.html/);
 });
@@ -43,8 +45,13 @@ test("admin dashboard renders stats and table rows", () => {
   assert.match(adminJs, /copySummary/);
   assert.match(adminJs, /updateAdminPaymentStatus/);
   assert.match(adminJs, /deleteRegistration/);
-  assert.match(adminJs, /delete-registration-button/);
+  assert.match(adminJs, /restoreRegistration/);
+  assert.match(adminJs, /permanentlyDeleteRegistration/);
+  assert.match(adminJs, /trash-registration-button/);
+  assert.match(adminJs, /restore-registration-button/);
+  assert.match(adminJs, /permanent-delete-registration-button/);
   assert.match(adminJs, /window\.confirm/);
+  assert.match(adminJs, /\/api\/admin\/registrations\/trash/);
   assert.match(adminJs, /admin-payment-select/);
   assert.match(adminJs, /getFilteredRegistrations/);
   assert.match(adminJs, /adminTableBody/);

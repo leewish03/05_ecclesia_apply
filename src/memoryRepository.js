@@ -15,11 +15,15 @@ export function createMemoryRepository(seed = []) {
     },
 
     async listPublicRegistrations() {
-      return rows.map(toPublicRegistration);
+      return rows.filter((row) => !row.deleted_at).map(toPublicRegistration);
     },
 
     async listAdminRegistrations() {
-      return rows.map(toAdminRegistration);
+      return rows.filter((row) => !row.deleted_at).map(toAdminRegistration);
+    },
+
+    async listTrashedRegistrations() {
+      return rows.filter((row) => row.deleted_at).map(toAdminRegistration);
     },
 
     async updateAdminPaymentStatus(id, status) {
@@ -34,6 +38,28 @@ export function createMemoryRepository(seed = []) {
     },
 
     async deleteRegistration(id) {
+      const row = rows.find((item) => item.id === id);
+
+      if (!row) {
+        throw new Error("응답을 찾을 수 없습니다.");
+      }
+
+      row.deleted_at = new Date().toISOString();
+      return toAdminRegistration(row);
+    },
+
+    async restoreRegistration(id) {
+      const row = rows.find((item) => item.id === id);
+
+      if (!row) {
+        throw new Error("응답을 찾을 수 없습니다.");
+      }
+
+      row.deleted_at = null;
+      return toAdminRegistration(row);
+    },
+
+    async permanentlyDeleteRegistration(id) {
       const index = rows.findIndex((item) => item.id === id);
 
       if (index === -1) {

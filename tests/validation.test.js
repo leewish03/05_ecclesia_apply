@@ -112,6 +112,7 @@ test("toAdminRegistration exposes all admin fields", () => {
     payment_confirmed: true,
     admin_payment_status: "paid",
     created_at: "2026-06-21T00:00:00.000Z",
+    deleted_at: "2026-06-22T00:00:00.000Z",
   });
 
   assert.deepEqual(adminRow, {
@@ -125,6 +126,7 @@ test("toAdminRegistration exposes all admin fields", () => {
     paymentConfirmed: true,
     adminPaymentStatus: "paid",
     createdAt: "2026-06-21T00:00:00.000Z",
+    deletedAt: "2026-06-22T00:00:00.000Z",
   });
 });
 

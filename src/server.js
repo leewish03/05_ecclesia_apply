@@ -107,6 +107,19 @@ export function createServer({ repository, config }) {
         return;
       }
 
+      if (request.method === "GET" && url.pathname === "/api/admin/registrations/trash") {
+        const accessCode = request.headers["x-admin-access-code"];
+
+        if (!isAdminAccessCodeValid(accessCode, config.adminAccessCode)) {
+          sendJson(response, 401, { ok: false, message: "관리자 코드가 올바르지 않습니다." });
+          return;
+        }
+
+        const registrations = await repository.listTrashedRegistrations();
+        sendJson(response, 200, { ok: true, registrations });
+        return;
+      }
+
       const paymentStatusMatch = url.pathname.match(/^\/api\/admin\/registrations\/([^/]+)\/payment-status$/);
       if (request.method === "PATCH" && paymentStatusMatch) {
         const accessCode = request.headers["x-admin-access-code"];
@@ -127,6 +140,38 @@ export function createServer({ repository, config }) {
         const registration = await repository.updateAdminPaymentStatus(
           decodeURIComponent(paymentStatusMatch[1]),
           status,
+        );
+        sendJson(response, 200, { ok: true, registration });
+        return;
+      }
+
+      const restoreMatch = url.pathname.match(/^\/api\/admin\/registrations\/([^/]+)\/restore$/);
+      if (request.method === "PATCH" && restoreMatch) {
+        const accessCode = request.headers["x-admin-access-code"];
+
+        if (!isAdminAccessCodeValid(accessCode, config.adminAccessCode)) {
+          sendJson(response, 401, { ok: false, message: "관리자 코드가 올바르지 않습니다." });
+          return;
+        }
+
+        const registration = await repository.restoreRegistration(
+          decodeURIComponent(restoreMatch[1]),
+        );
+        sendJson(response, 200, { ok: true, registration });
+        return;
+      }
+
+      const permanentDeleteMatch = url.pathname.match(/^\/api\/admin\/registrations\/([^/]+)\/permanent$/);
+      if (request.method === "DELETE" && permanentDeleteMatch) {
+        const accessCode = request.headers["x-admin-access-code"];
+
+        if (!isAdminAccessCodeValid(accessCode, config.adminAccessCode)) {
+          sendJson(response, 401, { ok: false, message: "관리자 코드가 올바르지 않습니다." });
+          return;
+        }
+
+        const registration = await repository.permanentlyDeleteRegistration(
+          decodeURIComponent(permanentDeleteMatch[1]),
         );
         sendJson(response, 200, { ok: true, registration });
         return;

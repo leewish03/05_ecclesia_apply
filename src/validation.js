@@ -108,5 +108,6 @@ export function toAdminRegistration(row) {
     paymentConfirmed: row.payment_confirmed,
     adminPaymentStatus: row.admin_payment_status || "unconfirmed",
     createdAt: row.created_at,
+    deletedAt: row.deleted_at || null,
   };
 }

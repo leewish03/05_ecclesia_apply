@@ -227,6 +227,7 @@ test("DELETE /api/admin/registrations/:id deletes an admin registration", async 
           paymentConfirmed: true,
           adminPaymentStatus: "unconfirmed",
           createdAt: "2026-06-21T00:00:00.000Z",
+          deletedAt: "2026-06-22T00:00:00.000Z",
         };
       },
     },
@@ -240,6 +241,7 @@ test("DELETE /api/admin/registrations/:id deletes an admin registration", async 
       assert.equal(response.status, 200);
       assert.equal(deletedId, "abc");
       assert.equal(body.registration.name, "홍길동");
+      assert.equal(body.registration.deletedAt, "2026-06-22T00:00:00.000Z");
     },
   );
 });
@@ -261,6 +263,119 @@ test("DELETE /api/admin/registrations/:id requires the admin access code", async
       });
 
       assert.equal(response.status, 401);
+    },
+  );
+});
+
+test("GET /api/admin/registrations/trash lists trashed registrations", async () => {
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      listTrashedRegistrations: async () => [
+        {
+          id: "abc",
+          name: "홍길동",
+          church: "서울교회",
+          phone: "01012345678",
+          gender: "남",
+          isSaved: true,
+          isBaptized: false,
+          paymentConfirmed: true,
+          adminPaymentStatus: "unconfirmed",
+          createdAt: "2026-06-21T00:00:00.000Z",
+          deletedAt: "2026-06-22T00:00:00.000Z",
+        },
+      ],
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/trash`, {
+        headers: { "x-admin-access-code": "demo-code" },
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.equal(body.registrations.length, 1);
+      assert.equal(body.registrations[0].deletedAt, "2026-06-22T00:00:00.000Z");
+    },
+  );
+});
+
+test("PATCH /api/admin/registrations/:id/restore restores a trashed registration", async () => {
+  let restoredId = null;
+
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      restoreRegistration: async (id) => {
+        restoredId = id;
+        return {
+          id,
+          name: "홍길동",
+          church: "서울교회",
+          phone: "01012345678",
+          gender: "남",
+          isSaved: true,
+          isBaptized: false,
+          paymentConfirmed: true,
+          adminPaymentStatus: "unconfirmed",
+          createdAt: "2026-06-21T00:00:00.000Z",
+          deletedAt: null,
+        };
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc/restore`, {
+        method: "PATCH",
+        headers: { "x-admin-access-code": "demo-code" },
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.equal(restoredId, "abc");
+      assert.equal(body.registration.deletedAt, null);
+    },
+  );
+});
+
+test("DELETE /api/admin/registrations/:id/permanent permanently deletes a registration", async () => {
+  let deletedId = null;
+
+  await withServer(
+    {
+      insertRegistration: async () => null,
+      listPublicRegistrations: async () => [],
+      listAdminRegistrations: async () => [],
+      permanentlyDeleteRegistration: async (id) => {
+        deletedId = id;
+        return {
+          id,
+          name: "홍길동",
+          church: "서울교회",
+          phone: "01012345678",
+          gender: "남",
+          isSaved: true,
+          isBaptized: false,
+          paymentConfirmed: true,
+          adminPaymentStatus: "unconfirmed",
+          createdAt: "2026-06-21T00:00:00.000Z",
+          deletedAt: "2026-06-22T00:00:00.000Z",
+        };
+      },
+    },
+    async (origin) => {
+      const response = await fetch(`${origin}/api/admin/registrations/abc/permanent`, {
+        method: "DELETE",
+        headers: { "x-admin-access-code": "demo-code" },
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.equal(deletedId, "abc");
+      assert.equal(body.registration.name, "홍길동");
     },
   );
 });

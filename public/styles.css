@@ -708,6 +708,12 @@ input:focus {
   color: var(--text) !important;
 }
 
+.admin-actions .secondary-button[aria-pressed="true"] {
+  border-color: var(--green) !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+}
+
 .danger-button {
   min-height: 34px;
   border: 1px solid #e2b7ae;
@@ -721,6 +727,26 @@ input:focus {
 }
 
 .danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.row-action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.row-action-group .secondary-button {
+  min-height: 34px;
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.row-action-group .secondary-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }

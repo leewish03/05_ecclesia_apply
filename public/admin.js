@@ -23,9 +23,12 @@ const baptizedFilter = document.querySelector("#baptizedFilter");
 const resetFiltersButton = document.querySelector("#resetFilters");
 const exportCsvButton = document.querySelector("#exportCsv");
 const copySummaryButton = document.querySelector("#copySummary");
+const activeViewButton = document.querySelector("#activeView");
+const trashViewButton = document.querySelector("#trashView");
 
 let allRegistrations = [];
 let visibleRegistrations = [];
+let currentView = "active";
 
 const PAYMENT_STATUS_LABELS = {
   unconfirmed: "미확인",
@@ -75,17 +78,44 @@ function paymentStatusSelect(item) {
   `;
 }
 
-function deleteButton(item) {
+function registrationActionButtons(item) {
+  const baseData = `
+    data-registration-id="${escapeHtml(item.id)}"
+    data-registration-name="${escapeHtml(item.name)}"
+    data-registration-church="${escapeHtml(item.church)}"
+  `;
+
+  if (currentView === "trash") {
+    return `
+      <div class="row-action-group">
+        <button
+          type="button"
+          class="secondary-button restore-registration-button"
+          ${baseData}
+          aria-label="${escapeHtml(item.name)} 응답 복구"
+        >
+          복구
+        </button>
+        <button
+          type="button"
+          class="danger-button permanent-delete-registration-button"
+          ${baseData}
+          aria-label="${escapeHtml(item.name)} 응답 영구 삭제"
+        >
+          영구 삭제
+        </button>
+      </div>
+    `;
+  }
+
   return `
     <button
       type="button"
-      class="danger-button delete-registration-button"
-      data-registration-id="${escapeHtml(item.id)}"
-      data-registration-name="${escapeHtml(item.name)}"
-      data-registration-church="${escapeHtml(item.church)}"
-      aria-label="${escapeHtml(item.name)} 응답 삭제"
+      class="danger-button trash-registration-button"
+      ${baseData}
+      aria-label="${escapeHtml(item.name)} 응답 휴지통 이동"
     >
-      삭제
+      휴지통
     </button>
   `;
 }
@@ -144,9 +174,9 @@ function renderAdminRows(registrations) {
           <td>${badge(item.isSaved ? "예" : "아니오", item.isSaved ? "success" : "muted")}</td>
           <td>${badge(item.isBaptized ? "예" : "아니오", item.isBaptized ? "success" : "muted")}</td>
           <td>${badge(item.paymentConfirmed ? "완료" : "미완료", item.paymentConfirmed ? "success" : "warning")}</td>
-          <td>${paymentStatusSelect(item)}</td>
+          <td>${currentView === "trash" ? badge(PAYMENT_STATUS_LABELS[item.adminPaymentStatus] || "미확인", PAYMENT_STATUS_TONES[item.adminPaymentStatus] || "muted") : paymentStatusSelect(item)}</td>
           <td>${new Date(item.createdAt).toLocaleString("ko-KR")}</td>
-          <td>${deleteButton(item)}</td>
+          <td>${registrationActionButtons(item)}</td>
         </tr>
       `,
     )
@@ -165,10 +195,11 @@ function renderAdminRows(registrations) {
             <div><dt>구원 여부</dt><dd>${item.isSaved ? "예" : "아니오"}</dd></div>
             <div><dt>침례 여부</dt><dd>${item.isBaptized ? "예" : "아니오"}</dd></div>
             <div><dt>자가 체크</dt><dd>${item.paymentConfirmed ? "완료" : "미완료"}</dd></div>
-            <div><dt>관리자 입금상태</dt><dd>${paymentStatusSelect(item)}</dd></div>
+            <div><dt>관리자 입금상태</dt><dd>${currentView === "trash" ? PAYMENT_STATUS_LABELS[item.adminPaymentStatus] || "미확인" : paymentStatusSelect(item)}</dd></div>
             <div><dt>신청일</dt><dd>${new Date(item.createdAt).toLocaleString("ko-KR")}</dd></div>
+            ${item.deletedAt ? `<div><dt>휴지통 이동</dt><dd>${new Date(item.deletedAt).toLocaleString("ko-KR")}</dd></div>` : ""}
           </dl>
-          <div class="admin-row-actions">${deleteButton(item)}</div>
+          <div class="admin-row-actions">${registrationActionButtons(item)}</div>
         </article>
       `,
     )
@@ -290,7 +321,7 @@ function applyFilters() {
   renderAdminStats(allRegistrations, visibleRegistrations);
   renderAdminRows(visibleRegistrations);
   setAdminMessage(
-    `전체 ${allRegistrations.length}개 중 ${visibleRegistrations.length}개를 표시 중입니다.`,
+    `${currentView === "trash" ? "휴지통" : "활성 응답"} ${allRegistrations.length}개 중 ${visibleRegistrations.length}개를 표시 중입니다.`,
     "success",
   );
 }
@@ -393,7 +424,48 @@ async function deleteRegistration(id) {
 
   allRegistrations = allRegistrations.filter((item) => item.id !== id);
   applyFilters();
-  setAdminMessage(`${body.registration.name}님의 응답을 삭제했습니다.`, "success");
+  setAdminMessage(`${body.registration.name}님의 응답을 휴지통으로 옮겼습니다.`, "success");
+}
+
+async function restoreRegistration(id) {
+  const accessCode = accessCodeInput.value;
+  const response = await fetch(`/api/admin/registrations/${encodeURIComponent(id)}/restore`, {
+    method: "PATCH",
+    headers: { "x-admin-access-code": accessCode },
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.message || "응답 복구에 실패했습니다.");
+  }
+
+  allRegistrations = allRegistrations.filter((item) => item.id !== id);
+  applyFilters();
+  setAdminMessage(`${body.registration.name}님의 응답을 복구했습니다.`, "success");
+}
+
+async function permanentlyDeleteRegistration(id) {
+  const accessCode = accessCodeInput.value;
+  const response = await fetch(`/api/admin/registrations/${encodeURIComponent(id)}/permanent`, {
+    method: "DELETE",
+    headers: { "x-admin-access-code": accessCode },
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.message || "응답 영구 삭제에 실패했습니다.");
+  }
+
+  allRegistrations = allRegistrations.filter((item) => item.id !== id);
+  applyFilters();
+  setAdminMessage(`${body.registration.name}님의 응답을 영구 삭제했습니다.`, "success");
+}
+
+function setCurrentView(view) {
+  currentView = view;
+  activeViewButton.setAttribute("aria-pressed", String(view === "active"));
+  trashViewButton.setAttribute("aria-pressed", String(view === "trash"));
+  loadAdminRows();
 }
 
 async function loadAdminRows() {
@@ -401,7 +473,10 @@ async function loadAdminRows() {
   setAdminMessage("불러오는 중입니다...");
 
   try {
-    const response = await fetch("/api/admin/registrations", {
+    const path = currentView === "trash"
+      ? "/api/admin/registrations/trash"
+      : "/api/admin/registrations";
+    const response = await fetch(path, {
       headers: { "x-admin-access-code": accessCode },
     });
     const body = await response.json();
@@ -413,7 +488,7 @@ async function loadAdminRows() {
     allRegistrations = body.registrations;
     visibleRegistrations = body.registrations;
     applyFilters();
-    setAdminMessage(`총 ${body.registrations.length}개의 응답을 불러왔습니다.`, "success");
+    setAdminMessage(`${currentView === "trash" ? "휴지통" : "활성 응답"} ${body.registrations.length}개를 불러왔습니다.`, "success");
   } catch (error) {
     setAdminMessage(error.message, "error");
   }
@@ -435,6 +510,8 @@ resetFiltersButton.addEventListener("click", () => {
   applyFilters();
 });
 exportCsvButton.addEventListener("click", exportVisibleCsv);
+activeViewButton.addEventListener("click", () => setCurrentView("active"));
+trashViewButton.addEventListener("click", () => setCurrentView("trash"));
 copySummaryButton.addEventListener("click", () => {
   copySummary().catch((error) => setAdminMessage(error.message, "error"));
 });
@@ -459,7 +536,9 @@ document.addEventListener("change", (event) => {
     });
 });
 document.addEventListener("click", (event) => {
-  const button = event.target.closest(".delete-registration-button");
+  const button = event.target.closest(
+    ".trash-registration-button, .restore-registration-button, .permanent-delete-registration-button",
+  );
 
   if (!button) {
     return;
@@ -470,12 +549,40 @@ document.addEventListener("click", (event) => {
   const church = button.dataset.registrationChurch || "";
   const label = church ? `${name}(${church})` : name;
 
-  if (!window.confirm(`${label} 응답을 삭제할까요?\n삭제하면 관리자 페이지와 신청자 현황에서 바로 사라집니다.`)) {
+  if (button.matches(".trash-registration-button")) {
+    if (!window.confirm(`${label} 응답을 휴지통으로 옮길까요?\n신청자 현황에서는 바로 사라지고, 휴지통에서 복구할 수 있습니다.`)) {
+      return;
+    }
+
+    button.disabled = true;
+    deleteRegistration(id)
+      .catch((error) => setAdminMessage(error.message, "error"))
+      .finally(() => {
+        button.disabled = false;
+      });
+    return;
+  }
+
+  if (button.matches(".restore-registration-button")) {
+    if (!window.confirm(`${label} 응답을 복구할까요?\n복구하면 관리자 목록과 신청자 현황에 다시 표시됩니다.`)) {
+      return;
+    }
+
+    button.disabled = true;
+    restoreRegistration(id)
+      .catch((error) => setAdminMessage(error.message, "error"))
+      .finally(() => {
+        button.disabled = false;
+      });
+    return;
+  }
+
+  if (!window.confirm(`${label} 응답을 영구 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) {
     return;
   }
 
   button.disabled = true;
-  deleteRegistration(id)
+  permanentlyDeleteRegistration(id)
     .catch((error) => setAdminMessage(error.message, "error"))
     .finally(() => {
       button.disabled = false;

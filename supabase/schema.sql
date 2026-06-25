@@ -11,7 +11,8 @@ create table if not exists public.registrations (
   payment_confirmed boolean not null,
   admin_payment_status text not null default 'unconfirmed'
     check (admin_payment_status in ('unconfirmed', 'unpaid', 'paid')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
 
 alter table public.registrations
@@ -19,6 +20,9 @@ alter table public.registrations
 
 alter table public.registrations
   add column if not exists admin_payment_status text not null default 'unconfirmed';
+
+alter table public.registrations
+  add column if not exists deleted_at timestamptz;
 
 do $$
 begin
@@ -37,6 +41,9 @@ alter table public.registrations enable row level security;
 
 create index if not exists registrations_created_at_idx
   on public.registrations (created_at desc);
+
+create index if not exists registrations_deleted_at_idx
+  on public.registrations (deleted_at desc);
 
 create index if not exists registrations_church_idx
   on public.registrations (church);
